@@ -439,13 +439,14 @@ void fastboot_data_complete(char *response)
  */
 static void flash(char *cmd_parameter, char *response)
 {
+	static bool mtd_flash = false;
+
 	u32 boot_mode = get_boot_pin_select();
 
 	switch(boot_mode){
 #if CONFIG_IS_ENABLED(FASTBOOT_FLASH_MTD) || CONFIG_IS_ENABLED(FASTBOOT_MULTI_FLASH_OPTION_MTD)
 	case BOOT_MODE_NOR:
 	case BOOT_MODE_NAND:
-		static bool mtd_flash = false;
 		if (!strncmp("mtd", cmd_parameter, 3))
 			mtd_flash = true;
 		if (!strncmp("gpt", cmd_parameter, 3))
@@ -487,13 +488,13 @@ static void flash(char *cmd_parameter, char *response)
  */
 static void erase(char *cmd_parameter, char *response)
 {
+	static bool mtd_flash = false;
 	u32 boot_mode = get_boot_pin_select();
 
 	switch(boot_mode){
 #ifdef CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV
 	case BOOT_MODE_NOR:
 	case BOOT_MODE_NAND:
-		static bool mtd_flash = false;
 		if (!strncmp("mtd", cmd_parameter, 3))
 			mtd_flash = true;
 		if (!strncmp("gpt", cmd_parameter, 3))

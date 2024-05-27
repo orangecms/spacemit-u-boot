@@ -125,12 +125,16 @@ static int getvar_get_part_info(const char *part_name, char *response,
 				size_t *size)
 {
 	int r;
+	struct part_info *mtd_part_info;
+	struct blk_desc *dev_desc;
+	struct disk_partition disk_part_info;
+
 	u32 boot_mode = get_boot_pin_select();
-	switch(boot_mode){
+
+	switch(boot_mode) {
 #if CONFIG_IS_ENABLED(FASTBOOT_FLASH_MTD) || CONFIG_IS_ENABLED(FASTBOOT_MULTI_FLASH_OPTION_MTD)
 	case BOOT_MODE_NOR:
 	case BOOT_MODE_NAND:
-		struct part_info *mtd_part_info;
 		r = fastboot_mtd_get_part_info(part_name, &mtd_part_info, response);
 		if (r >= 0 && size)
 			*size = mtd_part_info->size;
@@ -140,13 +144,10 @@ static int getvar_get_part_info(const char *part_name, char *response,
 #if CONFIG_IS_ENABLED(FASTBOOT_FLASH_MMC) || CONFIG_IS_ENABLED(FASTBOOT_MULTI_FLASH_OPTION_MMC)
 	case BOOT_MODE_EMMC:
 	case BOOT_MODE_SD:
-		struct blk_desc *dev_desc;
-		struct disk_partition part_info;
-
-		r = fastboot_mmc_get_part_info(part_name, &dev_desc, &part_info,
+		r = fastboot_mmc_get_part_info(part_name, &dev_desc, &disk_part_info,
 						response);
 		if (r >= 0 && size)
-			*size = part_info.size * part_info.blksz;
+			*size = disk_part_info.size * disk_part_info.blksz;
 		break;
 #endif
 	default:
@@ -245,13 +246,15 @@ static void getvar_current_slot(char *var_parameter, char *response)
 */
 static void getvar_mtd_size(char *var_parameter, char *response)
 {
+#if CONFIG_IS_ENABLED(FASTBOOT_FLASH_MTD) || CONFIG_IS_ENABLED(FASTBOOT_MULTI_FLASH_OPTION_MTD)
+	struct mtd_info *mtd;
+
 	u32 boot_mode = get_boot_pin_select();
-	switch(boot_mode){
+
+	switch(boot_mode) {
 	case BOOT_MODE_NOR:
 	case BOOT_MODE_NAND:
-#if CONFIG_IS_ENABLED(FASTBOOT_FLASH_MTD) || CONFIG_IS_ENABLED(FASTBOOT_MULTI_FLASH_OPTION_MTD)
 		/*if select nor/nand, it would check if mtd dev exists or not*/
-		struct mtd_info *mtd;
 		mtd_probe_devices();
 		mtd_for_each_device(mtd) {
 			if (!mtd_is_partition(mtd)) {
@@ -273,11 +276,11 @@ static void getvar_mtd_size(char *var_parameter, char *response)
 		}
 		fastboot_fail("flash to mtd dev but can not get mtd size", response);
 		return;
-#endif
 	default:
 		fastboot_okay("NULL", response);
 		return;
 	}
+#endif
 }
 
 /**
@@ -289,12 +292,15 @@ static void getvar_mtd_size(char *var_parameter, char *response)
  */
 static void getvar_blk_size(char *var_parameter, char *response)
 {
+#if defined(CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV_NAME) || defined(CONFIG_FASTBOOT_FLASH_MMC_DEV)
 	struct blk_desc *dev_desc = NULL;
 	const char *blk_name;
 	int blk_index;
+#endif
 
 	u32 boot_mode = get_boot_pin_select();
-	switch(boot_mode){
+
+	switch(boot_mode) {
 	case BOOT_MODE_NOR:
 #ifdef CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV_NAME
 		blk_name = CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV_NAME;

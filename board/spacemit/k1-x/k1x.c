@@ -339,7 +339,14 @@ char* parse_mtdparts_and_find_bootfs(void) {
 
 void import_env_from_bootfs(void)
 {
+#ifdef CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV_NAME
+  struct blk_desc *dev_desc;
+#endif
+	int dev;
+	struct mmc *mmc;
+
 	u32 boot_mode = get_boot_mode();
+
 	switch (boot_mode) {
 	case BOOT_MODE_NAND:
 #if CONFIG_IS_ENABLED(ENV_IS_IN_MTD)
@@ -381,16 +388,14 @@ void import_env_from_bootfs(void)
 		break;
 	case BOOT_MODE_NOR:
 #ifdef CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV_NAME
-		struct blk_desc *dev_desc;
-
 		/*nvme need scan at first*/
 		if (!strncmp("nvme", CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV_NAME, 4)
-						&& run_command("nvme scan", 0)){
+						&& run_command("nvme scan", 0)) {
 			pr_err("can not find any nvme devices!\n");
 			return;
 		}
 
-		if (strlen(CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV_NAME) > 0){
+		if (strlen(CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV_NAME) > 0) {
 			/* First try partition names on the default device */
 			dev_desc = blk_get_dev(CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV_NAME,
 								CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV_INDEX);
@@ -398,15 +403,12 @@ void import_env_from_bootfs(void)
 				_load_env_from_blk(dev_desc, CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV_NAME,
 							CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV_INDEX);
 			}
-	}
+	  }
 #endif
 		break;
 	case BOOT_MODE_EMMC:
 	case BOOT_MODE_SD:
 #ifdef CONFIG_MMC
-		int dev;
-		struct mmc *mmc;
-
 		dev = mmc_get_env_dev();
 		mmc = find_mmc_device(dev);
 		if (!mmc) {

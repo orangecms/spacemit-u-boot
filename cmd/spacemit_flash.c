@@ -13,12 +13,15 @@
 #include <div64.h>
 #include <dm.h>
 #include <dm/uclass-internal.h>
+#include <fb_mtd.h>
+#include <fb_spacemit.h>
 #include <fs.h>
 #include <image.h>
 #include <malloc.h>
 #include <mapmem.h>
 #include <memalign.h>
 #include <mmc.h>
+#include <mtd.h>
 #include <part.h>
 #include <u-boot/crc.h>
 #include <usb.h>
@@ -329,8 +332,8 @@ static int load_from_device(struct cmd_tbl *cmdtp, char *load_str,
 #endif //CONFIG_MMC
 
 #ifdef CONFIG_USB_STORAGE
+	static bool usb_init_flag = false;
 	case DEVICE_USB:
-		static bool usb_init_flag = false;
 		if (!usb_init_flag){
 			usb_init();
 			int device_number = usb_stor_scan(1);
@@ -1002,15 +1005,17 @@ static int perform_flash_operations(struct cmd_tbl *cmdtp, struct flash_dev *fde
 
 void get_mtd_partition_file(struct flash_dev *fdev)
 {
+#if defined(CONFIG_FASTBOOT_FLASH_MTD) || defined(CONFIG_FASTBOOT_MULTI_FLASH_OPTION_MTD)
 	char tmp_file[30] = {"\0"};
 
 	u32 boot_mode = get_boot_pin_select();
-	switch(boot_mode){
-#if CONFIG_IS_ENABLED(FASTBOOT_FLASH_MTD) || CONFIG_IS_ENABLED(FASTBOOT_MULTI_FLASH_OPTION_MTD)
+
+	struct mtd_info *mtd;
+
+	switch(boot_mode) {
 	case BOOT_MODE_NOR:
 	case BOOT_MODE_NAND:
 		/*if select nor/nand, it would check if mtd dev exists or not*/
-		struct mtd_info *mtd;
 		mtd_probe_devices();
 		mtd_for_each_device(mtd) {
 			if (!mtd_is_partition(mtd)) {
@@ -1032,20 +1037,22 @@ void get_mtd_partition_file(struct flash_dev *fdev)
 		pr_info("get mtd partition file name:%s, \n", tmp_file);
 		strcpy(fdev->partition_file_name, tmp_file);
 		return;
-#endif
 	default:
 		return;
 	}
+#endif
 }
 
 void get_blk_partition_file(char *file_name)
 {
+#if defined(CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV_NAME) || defined(CONFIG_FASTBOOT_FLASH_MMC_DEV)
 	struct blk_desc *dev_desc = NULL;
 	const char *blk_name;
 	int blk_index;
+#endif
 
 	u32 boot_mode = get_boot_pin_select();
-	switch(boot_mode){
+	switch(boot_mode) {
 #ifdef CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV_NAME
 	case BOOT_MODE_NOR:
 		blk_name = CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV_NAME;
