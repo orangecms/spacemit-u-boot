@@ -630,8 +630,8 @@ def main(argv):
     json_file = args.json_file
     output_file = args.output_file
 
-    log = common_decorator.Logger()
-    # log = common_decorator.Logger('debug')
+    # log = common_decorator.Logger()
+    log = common_decorator.Logger('debug')
     image = ImageBinary(log)
     config_info_dict = image.extract_config(json_file)
     if config_info_dict and image.verify_config(config_info_dict):
