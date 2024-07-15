@@ -29,16 +29,8 @@
 #define PMUA_MC_HW_SLP_TYPE	(PMUA_REG_BASE + 0xb0)
 #define REG32(x)	(*((volatile uint32_t *)((uintptr_t)(x))))
 
-#define LOGLEVEL 0
-#if (LOGLEVEL > 0)
 #define LogMsg(level, format, args...) \
-	do { \
-		if (level < LOGLEVEL) \
-			printf(format, ##args); \
-	} while (0)
-#else
-#define LogMsg(level, format, args...)
-#endif
+			printf(format, ##args);
 
 extern u32 ddr_cs_num;
 extern u32 ddr_get_mr8(void);
@@ -927,6 +919,7 @@ void adjust_mapping(u32 DDRC_BASE, u32 cs_num, u32 size_mb, u32 mr8_value)
 	u32 cs1_start_addr_l, cs1_start_addr_h;
 	u32 io_width, density;
 	u32 i, read_data;
+	u32 reg;
 	const struct addrmap_info *addrmap = &ddr_addrmap[13]; 
 
 	area_length_mb = size_mb / cs_num;
@@ -995,12 +988,18 @@ void adjust_mapping(u32 DDRC_BASE, u32 cs_num, u32 size_mb, u32 mr8_value)
 //     REG32(DDRC_BASE + MC_CH0_BASE + 0x20) = 0x05030632;//8 bank, 17 row, 10 column
 //     REG32(DDRC_BASE + MC_CH0_BASE + 0x24) = 0x05030632;//8 bank, 17 row, 10 column
 
-	LogMsg("DEBUG-ADDR[0x%x]:0x%x\n", (DDRC_BASE + MC_CH0_BASE), REG32(DDRC_BASE + MC_CH0_BASE));
-	LogMsg("DEBUG-ADDR[0x%x]:0x%x\n", (DDRC_BASE + MC_CH0_BASE + 0x4), REG32(DDRC_BASE + MC_CH0_BASE + 0x4));
-	LogMsg("DEBUG-ADDR[0x%x]:0x%x\n", (DDRC_BASE + MC_CH0_BASE + 0x8), REG32(DDRC_BASE + MC_CH0_BASE + 0x8));
-	LogMsg("DEBUG-ADDR[0x%x]:0x%x\n", (DDRC_BASE + MC_CH0_BASE + 0xc), REG32(DDRC_BASE + MC_CH0_BASE + 0xc));
-	LogMsg("DEBUG-ADDR[0x%x]:0x%x\n", (DDRC_BASE + MC_CH0_BASE + 0x20), REG32(DDRC_BASE + MC_CH0_BASE + 0x20));
-	LogMsg("DEBUG-ADDR[0x%x]:0x%x\n", (DDRC_BASE + MC_CH0_BASE + 0x24), REG32(DDRC_BASE + MC_CH0_BASE + 0x24));
+	reg = DDRC_BASE + MC_CH0_BASE;
+	LogMsg(0, "DEBUG-ADDR[0x%x]:0x%x\n", reg, REG32(reg));
+	reg = DDRC_BASE + MC_CH0_BASE + 0x4;
+	LogMsg(0, "DEBUG-ADDR[0x%x]:0x%x\n", reg, REG32(reg));
+	reg = DDRC_BASE + MC_CH0_BASE + 0x8;
+	LogMsg(0, "DEBUG-ADDR[0x%x]:0x%x\n", reg, REG32(reg));
+	reg = DDRC_BASE + MC_CH0_BASE + 0xc;
+	LogMsg(0, "DEBUG-ADDR[0x%x]:0x%x\n", reg, REG32(reg));
+	reg = DDRC_BASE + MC_CH0_BASE + 0x20;
+	LogMsg(0, "DEBUG-ADDR[0x%x]:0x%x\n", reg, REG32(reg));
+	reg = DDRC_BASE + MC_CH0_BASE + 0x24;
+	LogMsg(0, "DEBUG-ADDR[0x%x]:0x%x\n", reg, REG32(reg));
 }
 __maybe_unused static int printf_no_output(const char *fmt, ...)
 {
@@ -1013,10 +1012,6 @@ static void top_training_fp_all(u32 ddr_base, u32 cs_num, u32 boot_pp, void *inp
 	int (*func)(const char*, ...) = printf;
 	void (*training)(void* param);
 	unsigned long flush_lenth;
-
-	#if !(LOGLEVEL > 0)
-	func = printf_no_output;
-	#endif
 
 	to_traning_param[0] = ddr_base;
 	to_traning_param[1] = cs_num;
