@@ -190,6 +190,18 @@ u32 ddr_get_density(void)
 		cs1_size += mr8_cs11 ? format_size(((mr8_cs11 >> 2) & 0xf), io_width_cs11) : 0;
 	}
 
+	pr_info("ddr_cs_num %d\n", ddr_cs_num);
+
+	pr_info("mr8_cs00 %d\n", mr8_cs00);
+	pr_info("mr8_cs01 %d\n", mr8_cs01);
+	pr_info("mr8_cs10 %d\n", mr8_cs10);
+	pr_info("mr8_cs11 %d\n", mr8_cs11);
+
+	pr_info("io_width_cs00 %d\n", io_width_cs00);
+	pr_info("io_width_cs01 %d\n", io_width_cs01);
+	pr_info("io_width_cs10 %d\n", io_width_cs10);
+	pr_info("io_width_cs11 %d\n", io_width_cs11);
+
 	ddr_size = cs0_size + cs1_size;
 	pr_info("DDR size = %d MB\n", ddr_size);
 

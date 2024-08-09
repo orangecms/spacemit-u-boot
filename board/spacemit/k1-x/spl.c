@@ -446,6 +446,7 @@ int spl_board_init_f(void)
 	struct udevice *dev;
 	bool flag;
 	// uint64_t chipid = 0, mac_addr = 0;
+  pr_info("spl_board_init_f\n");
 
 #if CONFIG_IS_ENABLED(SYS_I2C_LEGACY)
 	/* init i2c */
@@ -516,6 +517,7 @@ void board_init_f(ulong dummy)
 
 	preloader_console_init();
 	pr_debug("boot_mode: %x\n", get_boot_mode());
+	pr_info("boot_mode: %x\n", get_boot_mode());
 
 	ret = spl_board_init_f();
 	if (ret)

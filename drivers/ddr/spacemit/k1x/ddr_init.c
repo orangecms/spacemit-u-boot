@@ -148,6 +148,8 @@ static int spacemit_ddr_probe(struct udevice *dev)
 		pr_info("ddr cs number not configed in dts!\n");
 		ddr_cs_num = DDR_CS_NUM;
 	}
+	pr_info("ddrc base: %llu\n", ddrc_base);
+	pr_info("ddr cs number: %u\n", ddr_cs_num);
 
 	/* init dram */
 	uint64_t start = get_timer(0);

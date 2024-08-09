@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 # -*- coding: utf-8 -*-
 import os
 import sys
@@ -369,7 +369,9 @@ class ImageBinary(object):
 
                 label, value, size = info_list[:3]
                 size = int(size, 0)
+                self.LOG.debug(f"label {label} value {value} size {size}")
                 key_obj = self.key_method_p.search(value)
+                self.LOG.debug(f"key_obj {key_obj}")
                 if label == 'name':
                     name = value
                 elif label == 'pad':
@@ -600,7 +602,7 @@ class ImageBinary(object):
         self.LOG.set_debug_level()
         return True
 
-    def build_iamge(self, config_dict, output_file):
+    def build_image(self, config_dict, output_file):
         with open(output_file, 'wb') as f:
             image_list = config_dict[self.image_key]
             # build data in case some data used before it's build
@@ -630,12 +632,12 @@ def main(argv):
     json_file = args.json_file
     output_file = args.output_file
 
-    # log = common_decorator.Logger()
-    log = common_decorator.Logger('debug')
+    log = common_decorator.Logger()
+    # log = common_decorator.Logger(clevel = 'DEBUG')
     image = ImageBinary(log)
     config_info_dict = image.extract_config(json_file)
     if config_info_dict and image.verify_config(config_info_dict):
-        image.build_iamge(config_info_dict, output_file)
+        image.build_image(config_info_dict, output_file)
 
 
 if __name__ == '__main__':

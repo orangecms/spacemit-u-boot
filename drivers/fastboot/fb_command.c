@@ -488,7 +488,9 @@ static void flash(char *cmd_parameter, char *response)
  */
 static void erase(char *cmd_parameter, char *response)
 {
+#ifdef CONFIG_FASTBOOT_SUPPORT_BLOCK_DEV
 	static bool mtd_flash = false;
+#endif
 	u32 boot_mode = get_boot_pin_select();
 
 	switch(boot_mode){

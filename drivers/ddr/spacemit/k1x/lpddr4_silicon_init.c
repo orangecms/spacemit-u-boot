@@ -837,6 +837,7 @@ void top_Common_config(void)
 
 void top_DDR_MC_Phy_Device_Init(unsigned int DDRC_BASE,unsigned int cs_val,unsigned int fp)
 {
+  // same as Marvell
 	unsigned DFI_PHY_USER_COMMAND_0 = DDRC_BASE + 0x13D0;
 	__maybe_unused unsigned DPHY0_BASE = DDRC_BASE + 0x40000;
 	unsigned read_data = 0;
@@ -1001,11 +1002,8 @@ void adjust_mapping(u32 DDRC_BASE, u32 cs_num, u32 size_mb, u32 mr8_value)
 	reg = DDRC_BASE + MC_CH0_BASE + 0x24;
 	LogMsg(0, "DEBUG-ADDR[0x%x]:0x%x\n", reg, REG32(reg));
 }
-__maybe_unused static int printf_no_output(const char *fmt, ...)
-{
-        return 0;
-}
 
+// NOTE: This is called 3 times, with a different boot_pp each: 0, 1, 2
 static void top_training_fp_all(u32 ddr_base, u32 cs_num, u32 boot_pp, void *input)
 {
 	u64 to_traning_param[10];
@@ -1033,13 +1031,21 @@ void lpddr4_silicon_init(u32 ddr_base, u32 data_rate)
 	struct ddr_training_info_t *info;
 
 	cs_num = ddr_cs_num;
+	// this actually reads the header as injected by the build process
+	// this whole thing doesn't really makes sense, starts in the middle of the
+	// root PK and while there are indeed a magic etc, they come later, and the
+  // struct is somewhat different...
 	info = (struct ddr_training_info_t*)map_sysmem(DDR_TRAINING_INFO_BUFF, 0);
+
+  pr_info("%x %x %llx %llx\n", info->magic, info->crc32, info->chipid, info->mac_addr);
+
 	top_Common_config();
 
 	top_DDR_MC_Phy_Device_Init(ddr_base, cs_num, 0);
 
 	size_mb = ddr_get_density();
 	mr8_value = ddr_get_mr8();
+	LogMsg(0,"ddr density: %u MB \n", size_mb);
 	adjust_mapping(ddr_base, cs_num, size_mb, mr8_value);
 	LogMsg(0,"ddr density: %u MB \n", size_mb);
 
@@ -1061,7 +1067,7 @@ void lpddr4_silicon_init(u32 ddr_base, u32 data_rate)
 	case 1600:
 		ddr_dfc(1);
 		break;
-
+	// WE HIT THIS
 	case 2400:
 		ddr_dfc(2);
 		break;
@@ -1077,4 +1083,3 @@ void lpddr4_silicon_init(u32 ddr_base, u32 data_rate)
 }
 
 #endif
-

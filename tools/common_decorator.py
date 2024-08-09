@@ -10,10 +10,10 @@ import traceback
 import logging
 
 class Logger(object):
-    def __init__(self, clevel = 'info'):
+    def __init__(self, clevel = 'debug'):
         self.logger = logging.Logger(__name__)
         # self.logger = logging.getLogger(__name__)
-        # self.logger.setLevel(clevel)
+        self.logger.setLevel(logging.DEBUG)
 
         self.LOGLEVEL = {
             'NOTSET': logging.NOTSET,   'DEBUG'     : logging.DEBUG,
@@ -31,9 +31,9 @@ class Logger(object):
         self.file_handler = None
         self.set_debug_level(clevel)
 
-    def set_debug_level(self, clevel = 'info'):
+    def set_debug_level(self, clevel = 'debug'):
         clevel = clevel.upper()
-        clevel = self.LOGLEVEL.get(clevel, logging.INFO)
+        clevel = self.LOGLEVEL.get(clevel, logging.DEBUG)
         if clevel < logging.INFO:
             formatter = logging.Formatter('[%(module)s]: (%(lineno)d) (%(asctime)s) %(message)s')
         else:
@@ -49,10 +49,10 @@ class Logger(object):
         self.stream_handler = sh
         return True
 
-    def set_file_debug_level(self, flevel = 'info', path = None):
+    def set_file_debug_level(self, flevel = 'debug', path = None):
         if path:
             flevel = flevel.upper()
-            flevel = self.LOGLEVEL.get(flevel, logging.INFO)
+            flevel = self.LOGLEVEL.get(flevel, logging.DEBUG)
             if flevel < logging.INFO:
                 formatter = logging.Formatter('[%(module)s]: (%(lineno)d) (%(asctime)s) %(message)s')
             else:
